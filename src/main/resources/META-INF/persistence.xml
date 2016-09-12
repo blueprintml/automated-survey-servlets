@@ -5,16 +5,15 @@
     http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd" version="1.0">
 
     <persistence-unit name="jpaUnit" transaction-type="RESOURCE_LOCAL">
-        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
         <class>com.twilio.automatedsurvey.survey.Survey</class>
         <class>com.twilio.automatedsurvey.survey.Question</class>
 
         <properties>
-            <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="hibernate.hbm2ddl.auto" value="update" />
-            <property name="hibernate.format_sql" value="true" />
-            <property name="hibernate.show_sql" value="true" />
+            <property name="javax.persistence.jdbc.driver" value="org.sqlite.JDBC"/>
+            <property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
+            <property name="eclipselink.ddl-generation.output-mode" value="database" />
         </properties>
     </persistence-unit>
 </persistence>
