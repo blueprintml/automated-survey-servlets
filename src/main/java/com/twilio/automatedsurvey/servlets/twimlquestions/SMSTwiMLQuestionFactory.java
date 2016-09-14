@@ -1,19 +1,17 @@
 package com.twilio.automatedsurvey.servlets.twimlquestions;
 
 import com.twilio.automatedsurvey.survey.Question;
-import com.twilio.sdk.verbs.Message;
-import com.twilio.sdk.verbs.TwiMLException;
-import com.twilio.sdk.verbs.TwiMLResponse;
+import com.twilio.twiml.Body;
+import com.twilio.twiml.Message;
+import com.twilio.twiml.MessagingResponse;
 
 public class SMSTwiMLQuestionFactory extends AbstractTwiMLQuestionFactory {
+
     @Override
-    public TwiMLResponse build(Long surveyId, Question question) {
-        TwiMLResponse response = new TwiMLResponse();
-        try {
-            response.append(new Message(question.getBody()));
-        } catch (TwiMLException e) {
-            e.printStackTrace();
-        }
-        return response;
+    public MessagingResponse build(Long surveyId, Question question) {
+        return new MessagingResponse.Builder()
+                .message(new Message.Builder().body(new Body(question.getBody())).build()
+                )
+                .build();
     }
 }
