@@ -4,7 +4,8 @@ import com.twilio.automatedsurvey.servlets.twimlquestions.AbstractTwiMLQuestionF
 import com.twilio.automatedsurvey.servlets.twimlquestions.XMlTestHelper;
 import com.twilio.automatedsurvey.survey.Question;
 import com.twilio.automatedsurvey.survey.QuestionTypes;
-import com.twilio.sdk.verbs.*;
+import com.twilio.twiml.TwiML;
+import com.twilio.twiml.TwiMLException;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -21,13 +22,13 @@ import static org.mockito.Mockito.mock;
 public class TelephoneTwiMLQuestionFactoryTest {
 
     @Test
-    public void shouldReturnVoiceQuestionTwiMLRepresentation() throws ParserConfigurationException, IOException, SAXException {
+    public void shouldReturnVoiceQuestionTwiMLRepresentation() throws ParserConfigurationException, IOException, SAXException, TwiMLException {
         final Question voiceQuestion = new Question("Is that a voiceQuestion?", QuestionTypes.voice);
-        TwiMLResponse twiMLVoiceQuestion = TelephoneTwiMLQuestionFactory
+        TwiML twiMLVoiceQuestion = TelephoneTwiMLQuestionFactory
                 .getInstance(mock(HttpServletRequest.class))
                 .build(1l, voiceQuestion);
 
-        String xml = twiMLVoiceQuestion.toEscapedXML();
+        String xml = twiMLVoiceQuestion.toXml();
 
         Document xmlDocument = XMlTestHelper.createDocumentFromXml(xml);
 
@@ -46,9 +47,9 @@ public class TelephoneTwiMLQuestionFactoryTest {
         final Question numericQuestion = new Question("Is that a question?", QuestionTypes.numeric);
         AbstractTwiMLQuestionFactory questionFactory = TelephoneTwiMLQuestionFactory
                 .getInstance(mock(HttpServletRequest.class));
-        TwiMLResponse twiMLNumericQuestion = questionFactory.build(1L, numericQuestion);
+        TwiML twiMLNumericQuestion = questionFactory.build(1L, numericQuestion);
 
-        String xml = twiMLNumericQuestion.toEscapedXML();
+        String xml = twiMLNumericQuestion.toXml();
 
         Document document = XMlTestHelper.createDocumentFromXml(xml);
 
@@ -61,13 +62,13 @@ public class TelephoneTwiMLQuestionFactoryTest {
     }
 
     @Test
-    public void shouldReturnYesNoQuestionTwiMLRepresentation() throws IOException, SAXException, ParserConfigurationException {
+    public void shouldReturnYesNoQuestionTwiMLRepresentation() throws IOException, SAXException, ParserConfigurationException, TwiMLException {
         final Question yesNoQuestion = new Question("Is that a yesNoQuestion?", QuestionTypes.yesno);
         AbstractTwiMLQuestionFactory questionFactory = TelephoneTwiMLQuestionFactory
                 .getInstance(mock(HttpServletRequest.class));
-        TwiMLResponse twiMLYesNoQuestion = questionFactory.build(1l, yesNoQuestion);
+        TwiML twiMLYesNoQuestion = questionFactory.build(1l, yesNoQuestion);
 
-        String xml = twiMLYesNoQuestion.toEscapedXML();
+        String xml = twiMLYesNoQuestion.toXml();
         Document document = XMlTestHelper.createDocumentFromXml(xml);
         Node response = document.getElementsByTagName("Response").item(0);
         assertThat(response, hasXPath("/Response/Say[text() = 'For the next question, press 1 for yes, and 0 for no. " +

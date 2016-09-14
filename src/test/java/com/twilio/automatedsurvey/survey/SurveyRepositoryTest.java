@@ -5,8 +5,6 @@ import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.jpa.JpaPersistModule;
 import com.twilio.automatedsurvey.IntegrationTestHelper;
-import com.twilio.automatedsurvey.survey.Survey;
-import com.twilio.automatedsurvey.survey.SurveyRepository;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,10 +38,9 @@ public class SurveyRepositoryTest {
     private JpaPersistModule configPersistModule() {
         JpaPersistModule testPersistModule = new JpaPersistModule("jpaUnit");
 
-        String databaseUrl = System.getenv("TEST_DATABASE_URL");
-        String databaseUser = System.getenv("TEST_DATABASE_USER");
-        String databasePassword = System.getenv("TEST_DATABASE_PASSWORD") == null ?
-                "" : System.getenv("TEST_DATABASE_PASSWORD");
+        final String databaseUrl = "jdbc:sqlite::memory:";
+        final String databaseUser = "";
+        final String databasePassword = "";
 
         testPersistModule.properties(new HashMap<String, String>(){{
             put("javax.persistence.jdbc.url", databaseUrl);
