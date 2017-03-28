@@ -4,6 +4,12 @@ plugins {
   id 'org.akhikhl.gretty' version '1.2.4'
 }
 
+gretty {
+    httpPort = 8080
+    contextPath = ''
+    logbackConfigFile = "src/main/resources/logback.xml"
+}
+
 repositories {
   mavenLocal()
   mavenCentral()
