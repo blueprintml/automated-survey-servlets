@@ -2,11 +2,11 @@ package com.twilio.automatedsurvey.servlets;
 
 import com.twilio.automatedsurvey.servlets.twimlquestions.AbstractTwiMLQuestionFactory;
 import com.twilio.automatedsurvey.survey.Question;
-import com.twilio.twiml.Gather;
-import com.twilio.twiml.Method;
-import com.twilio.twiml.Pause;
-import com.twilio.twiml.Record;
-import com.twilio.twiml.Say;
+import com.twilio.http.HttpMethod;
+import com.twilio.twiml.voice.Gather;
+import com.twilio.twiml.voice.Pause;
+import com.twilio.twiml.voice.Record;
+import com.twilio.twiml.voice.Say;
 import com.twilio.twiml.VoiceResponse;
 
 public class TelephoneTwiMLQuestionFactory extends AbstractTwiMLQuestionFactory {
@@ -38,7 +38,7 @@ public class TelephoneTwiMLQuestionFactory extends AbstractTwiMLQuestionFactory 
                         .transcribe(true)
                         .transcribeCallback("survey?survey="+ surveyId +"&amp;question="+question.getId())
                         .action("survey?survey="+ surveyId +"&amp;question="+question.getId())
-                        .method(Method.POST)
+                        .method(HttpMethod.POST)
                         .maxLength(6)
                         .build()
                 )
@@ -52,7 +52,7 @@ public class TelephoneTwiMLQuestionFactory extends AbstractTwiMLQuestionFactory 
                 .say(new Say.Builder(question.getBody()).build())
                 .gather(new Gather.Builder()
                         .action("survey?survey=" + surveyId + "&amp;question=" + question.getId())
-                        .method(Method.POST)
+                        .method(HttpMethod.POST)
                         .finishOnKey("#")
                         .build()
                 )

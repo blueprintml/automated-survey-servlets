@@ -6,12 +6,12 @@ import com.twilio.automatedsurvey.survey.Question;
 import com.twilio.automatedsurvey.survey.Survey;
 import com.twilio.automatedsurvey.survey.SurveyRepository;
 import com.twilio.automatedsurvey.survey.loader.SurveyLoader;
-import com.twilio.twiml.Body;
-import com.twilio.twiml.Message;
 import com.twilio.twiml.MessagingResponse;
-import com.twilio.twiml.Method;
-import com.twilio.twiml.Redirect;
-import com.twilio.twiml.Say;
+import com.twilio.http.HttpMethod;
+import com.twilio.twiml.messaging.Body;
+import com.twilio.twiml.messaging.Message;
+import com.twilio.twiml.messaging.Redirect;
+import com.twilio.twiml.voice.Say;
 import com.twilio.twiml.TwiML;
 import com.twilio.twiml.TwiMLException;
 import com.twilio.twiml.VoiceResponse;
@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 
 @Singleton
@@ -55,12 +57,14 @@ public class SurveyServlet extends HttpServlet {
                 Survey newSurvey = createSurveyInstance();
 
                 String message = String.format("Welcome to the %s survey", newSurvey.getTitle());
+                URI redirectUrl = new URI(String.format("question?survey=%s", newSurvey.getId()));
                 if (isSms(request)) {
                     MessagingResponse messagingResponse = new MessagingResponse.Builder()
-                            .message(new Message.Builder().body(new Body(message)).build())
-                            .redirect(new Redirect.Builder()
-                                    .url(String.format("question?survey=%s", newSurvey.getId()))
-                                    .method(Method.GET)
+                            .message(new Message.Builder()
+                                    .body(new Body.Builder(message).build())
+                                    .build())
+                            .redirect(new Redirect.Builder(redirectUrl)
+                                    .method(HttpMethod.GET)
                                     .build()
                             )
                             .build();
@@ -70,9 +74,9 @@ public class SurveyServlet extends HttpServlet {
                 } else {
                     VoiceResponse voiceResponse = new VoiceResponse.Builder()
                             .say(new Say.Builder(message).build())
-                            .redirect(new Redirect.Builder()
-                                    .url(String.format("question?survey=%s", newSurvey.getId()))
-                                    .method(Method.GET)
+                            .redirect(new com.twilio.twiml.voice.Redirect
+                                    .Builder(redirectUrl)
+                                    .method(HttpMethod.GET)
                                     .build()
                             )
                             .build();
@@ -93,11 +97,11 @@ public class SurveyServlet extends HttpServlet {
         return surveyRepo.add(loader.load());
     }
 
-    private void redirectToAnswerEndpoint(HttpServletResponse response, String survey, String lastQuestion) throws TwiMLException, IOException {
+    private void redirectToAnswerEndpoint(HttpServletResponse response, String survey, String lastQuestion) throws TwiMLException, IOException, URISyntaxException {
+        URI redirectUri = new URI(String.format("survey?survey=%s&question=%s", survey, lastQuestion));
         MessagingResponse messagingResponse = new MessagingResponse.Builder()
-                .redirect(new Redirect.Builder()
-                        .url(String.format("survey?survey=%s&question=%s", survey, lastQuestion))
-                        .method(Method.POST)
+                .redirect(new Redirect.Builder(redirectUri)
+                        .method(HttpMethod.POST)
                         .build()
                 )
                 .build();
@@ -144,7 +148,9 @@ public class SurveyServlet extends HttpServlet {
         final String realMessage = String.format("Thank you for taking the %s survey. Good bye.", surveyTitle);
         if (isSms(request)) {
             return new MessagingResponse.Builder()
-                    .message(new Message.Builder().body(new Body(realMessage)).build())
+                    .message(new Message.Builder()
+                                        .body(new Body.Builder(realMessage).build())
+                                        .build())
                     .build();
         } else {
             return new VoiceResponse.Builder()
@@ -154,15 +160,28 @@ public class SurveyServlet extends HttpServlet {
     }
 
     private TwiML buildRedirectTwiMLMessage(Long surveyId, Question q, HttpServletRequest request) {
-        final String url = String.format("question?survey=%s&question=%s", surveyId, q.getId());
-        final Redirect redirect = new Redirect.Builder().url(url).method(Method.GET).build();
+        final URI url;
+        try {
+            url = new URI(String.format("question?survey=%s&question=%s", surveyId, q.getId()));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        final Redirect messagingRedirect = new Redirect.Builder(url)
+                                                       .method(HttpMethod.GET)
+                                                       .build();
+        final com.twilio.twiml.voice.Redirect voiceRedirect = new com.twilio.twiml.voice.Redirect
+                .Builder(url)
+                .method(HttpMethod.GET)
+                .build();
+
         if (isSms(request)) {
             return new MessagingResponse.Builder()
-                    .redirect(redirect)
+                    .redirect(messagingRedirect)
                     .build();
         } else {
             return new VoiceResponse.Builder()
-                    .redirect(redirect)
+                    .redirect(voiceRedirect)
                     .build();
         }
     }
