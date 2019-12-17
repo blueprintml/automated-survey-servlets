@@ -22,7 +22,7 @@ dependencies {
   compile 'ch.qos.logback:logback-classic:1.2.2'
   compile 'ch.qos.logback:logback-access:1.2.2'
 
-  compile 'org.slf4j:slf4j-api:1.7.21'
+  compile 'org.slf4j:slf4j-api:1.7.30'
   compile 'org.slf4j:slf4j-simple:1.7.21'
 
   compile 'com.twilio.sdk:twilio:7.16.0'
